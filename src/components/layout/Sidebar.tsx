@@ -50,7 +50,9 @@ export default function Sidebar() {
       )
     }
     
-    return result
+    return [...result].sort(
+      (a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
+    )
   }, [chats, sidebarSearch, statusFilter])
 
   const confirmDelete = useCallback(async () => {
