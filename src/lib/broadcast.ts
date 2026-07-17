@@ -1,5 +1,5 @@
 import { RealtimeChannel } from '@supabase/supabase-js'
-import { supabase } from './db/index'
+import { supabase } from './supabase'
 
 export type BroadcastEvent =
   | { type: 'CHAT_UPDATED'; chatId: string; updates: Record<string, any> }
@@ -9,7 +9,7 @@ export type BroadcastEvent =
 let globalChannel: RealtimeChannel | null = null
 let currentProjectId: string | null = null
 
-export function getBroadcastChannel(projectId: string) {
+export function getBroadcastChannel(projectId: string): RealtimeChannel {
   if (globalChannel && currentProjectId === projectId) {
     return globalChannel
   }

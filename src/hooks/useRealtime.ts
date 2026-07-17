@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
 import { useAppStore } from '@/store/useAppStore'
 import { getBroadcastChannel, BroadcastEvent } from '@/lib/broadcast'
-import { fetchChatsByProject, getChatMessages } from '@/lib/db'
+import { fetchChatsByProject, fetchMessages } from '@/lib/db'
 
 export function useRealtime() {
-  const { activeProjectId, activeChatId, updateChat, setChats, setMessages, messages } = useAppStore()
+  const { activeProjectId, activeChatId, updateChat } = useAppStore()
 
   useEffect(() => {
     if (!activeProjectId) return
@@ -26,7 +26,7 @@ export function useRealtime() {
         else if (payload.type === 'MESSAGES_CHANGED') {
           // If the changed messages belong to the currently open chat, refetch them
           if (activeChatId === payload.chatId) {
-            const newMessages = await getChatMessages(payload.chatId)
+            const newMessages = await fetchMessages(payload.chatId)
             useAppStore.getState().setMessages(newMessages)
           }
         } 
@@ -38,7 +38,7 @@ export function useRealtime() {
           
           // If the imported chat is currently open, refetch its messages
           if (activeChatId === payload.chatId) {
-            const newMessages = await getChatMessages(payload.chatId)
+            const newMessages = await fetchMessages(payload.chatId)
             useAppStore.getState().setMessages(newMessages)
           }
         }
