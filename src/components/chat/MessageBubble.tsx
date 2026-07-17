@@ -233,15 +233,16 @@ function AttachmentContent({ url, fileName, onImageClick }: { url: string | null
 
   if (isPdf) {
     return (
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center gap-2 bg-red-50 rounded-lg px-3 py-2.5 mb-1.5 border border-red-100 hover:bg-red-100 transition-colors"
+      <button
+        onClick={(e) => {
+          e.preventDefault()
+          onImageClick ? onImageClick(url) : window.open(url, '_blank')
+        }}
+        className="flex w-full text-left items-center gap-2 bg-red-50 rounded-lg px-3 py-2.5 mb-1.5 border border-red-100 hover:bg-red-100 transition-colors cursor-pointer"
       >
         <FileText size={16} className="text-red-500 flex-shrink-0" />
         <span className="text-xs font-medium text-red-700 truncate">{fileName || 'Dokumen PDF'}</span>
-      </a>
+      </button>
     )
   }
 

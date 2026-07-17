@@ -304,13 +304,26 @@ export default function ChatView() {
             <X size={24} />
           </button>
           
-          <img
-            src={selectedImage}
-            alt="Expanded view"
-            className="max-w-[90vw] max-h-[90vh] object-contain rounded-sm"
-            onClick={(e) => e.stopPropagation()} // Prevent clicking image from closing
-            crossOrigin="anonymous"
-          />
+          {selectedImage.toLowerCase().match(/\.pdf(\?.*)?$/) ? (
+            <div
+              className="w-[90vw] h-[90vh] bg-white rounded-lg shadow-xl overflow-hidden relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <iframe
+                src={selectedImage}
+                title="PDF Viewer"
+                className="w-full h-full border-none"
+              />
+            </div>
+          ) : (
+            <img
+              src={selectedImage}
+              alt="Expanded view"
+              className="max-w-[90vw] max-h-[90vh] object-contain rounded-sm"
+              onClick={(e) => e.stopPropagation()} // Prevent clicking image from closing
+              crossOrigin="anonymous"
+            />
+          )}
         </div>
       )}
     </div>
