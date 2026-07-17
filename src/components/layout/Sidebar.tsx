@@ -254,11 +254,15 @@ function ChatItem({ chat, isActive, unreadCount = 0, onSelect, onDelete }: ChatI
         aria-selected={isActive}
       >
         {/* Avatar */}
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-wa-green-dark to-wa-green flex items-center justify-center flex-shrink-0">
-          <span className="text-white font-semibold text-base">
-            {chat.contact_name[0]?.toUpperCase() ?? '?'}
-          </span>
-        </div>
+        {(chat.status === 'Opsi 1' || chat.status === 'Opsi 2') ? (
+          <img src="/avatar-opsi.jpg" alt={chat.contact_name} className="w-12 h-12 rounded-full object-cover flex-shrink-0 shadow-sm" />
+        ) : (
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-wa-green-dark to-wa-green flex items-center justify-center flex-shrink-0 overflow-hidden shadow-sm">
+            <span className="text-white font-semibold text-base">
+              {chat.contact_name[0]?.toUpperCase() ?? '?'}
+            </span>
+          </div>
+        )}
 
         {/* Info */}
         <div className="flex-1 min-w-0 pr-6">

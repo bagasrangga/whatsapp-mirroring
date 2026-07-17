@@ -48,11 +48,15 @@ export default function VendorPanel({ chat, onClose }: Props) {
 
       {/* Avatar & name */}
       <div className="flex flex-col items-center gap-2 py-6 bg-white border-b border-gray-100">
-        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-wa-green-dark to-wa-green flex items-center justify-center shadow-md">
-          <span className="text-white text-3xl font-bold">
-            {chat.contact_name[0]?.toUpperCase()}
-          </span>
-        </div>
+        {(chat.status === 'Opsi 1' || chat.status === 'Opsi 2') ? (
+          <img src="/avatar-opsi.jpg" alt={chat.contact_name} className="w-20 h-20 rounded-full object-cover shadow-md" />
+        ) : (
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-wa-green-dark to-wa-green flex items-center justify-center shadow-md overflow-hidden">
+            <span className="text-white text-3xl font-bold">
+              {chat.contact_name[0]?.toUpperCase()}
+            </span>
+          </div>
+        )}
         <p className="font-semibold text-foreground text-lg">{chat.contact_name}</p>
         {chat.vendor_phone_number && (
           <a
