@@ -158,12 +158,17 @@ export function useImportPipeline() {
             lastMessageSnippet: lastReal.text.slice(0, 80),
           })
 
+          const store = useAppStore.getState()
+          
           if (existingChat) {
-            updateChat(chatId, {
+            store.updateChat(chatId, {
               last_message_at: lastReal.timestamp,
               last_message_snippet: lastReal.text.slice(0, 80),
             })
           }
+          
+          // Set unread for newly synced messages
+          store.incrementUnread(chatId, messagesToProcess.length)
         }
 
         progress({ stage: 'done' })

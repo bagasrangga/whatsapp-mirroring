@@ -18,6 +18,7 @@ export default function Sidebar() {
     setActiveProject,
     setSidebarSearch,
     removeChat,
+    unreadCounts,
   } = useAppStore()
 
   const [showImport, setShowImport] = useState(false)
@@ -161,6 +162,7 @@ export default function Sidebar() {
                   key={chat.id}
                   chat={chat}
                   isActive={activeChatId === chat.id}
+                  unreadCount={unreadCounts[chat.id] || 0}
                   onSelect={() => setActiveChat(chat.id)}
                   onDelete={() => setDeletingChatId(chat.id)}
                 />
@@ -224,11 +226,12 @@ export default function Sidebar() {
 interface ChatItemProps {
   chat: Chat
   isActive: boolean
+  unreadCount?: number
   onSelect: () => void
   onDelete: () => void
 }
 
-function ChatItem({ chat, isActive, onSelect, onDelete }: ChatItemProps) {
+function ChatItem({ chat, isActive, unreadCount = 0, onSelect, onDelete }: ChatItemProps) {
   const [hovered, setHovered] = useState(false)
 
   const colorMap: Record<string, string> = {
@@ -262,7 +265,7 @@ function ChatItem({ chat, isActive, onSelect, onDelete }: ChatItemProps) {
             <span className="font-medium text-sm text-foreground truncate">
               {chat.contact_name}
             </span>
-            <span className="text-xs text-wa-timestamp flex-shrink-0">
+            <span className={`text-xs flex-shrink-0 ${unreadCount > 0 ? 'text-wa-green font-medium' : 'text-wa-timestamp'}`}>
               {formatChatTime(chat.last_message_at)}
             </span>
           </div>
@@ -279,6 +282,11 @@ function ChatItem({ chat, isActive, onSelect, onDelete }: ChatItemProps) {
             )}
             {chat.status !== 'None' && (
               <span className={`w-2 h-2 rounded-full flex-shrink-0 ${getStatusDotColor(chat.status)}`} />
+            )}
+            {unreadCount > 0 && (
+              <span className="min-w-[1.25rem] h-5 rounded-full bg-wa-green flex items-center justify-center text-[11px] font-bold text-white px-1.5 flex-shrink-0">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
             )}
           </div>
           {chat.status !== 'None' && (

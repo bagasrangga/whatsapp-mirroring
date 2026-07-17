@@ -15,11 +15,14 @@ interface AppState {
   // ─── Chat ─────────────────────────────────────────────────────────────
   chats: Chat[]
   activeChatId: string | null
+  unreadCounts: Record<string, number>
   setChats: (chats: Chat[]) => void
   addChat: (chat: Chat) => void
   updateChat: (chatId: string, updates: Partial<Chat>) => void
   removeChat: (chatId: string) => void
   setActiveChat: (id: string | null) => void
+  incrementUnread: (chatId: string, count: number) => void
+  clearUnread: (chatId: string) => void
 
   // ─── Messages ─────────────────────────────────────────────────────────
   messages: Message[]
@@ -63,6 +66,7 @@ export const useAppStore = create<AppState>()(
   // ─── Chat ───────────────────────────────────────────────────────────────
   chats: [],
   activeChatId: null,
+  unreadCounts: {},
   setChats: (chats) => set({ chats }),
   addChat: (chat) => set((s) => ({ chats: [chat, ...s.chats] })),
   updateChat: (chatId, updates) =>
@@ -70,17 +74,40 @@ export const useAppStore = create<AppState>()(
       chats: s.chats.map((c) => (c.id === chatId ? { ...c, ...updates } : c)),
     })),
   removeChat: (chatId) =>
-    set((s) => ({
-      chats: s.chats.filter((c) => c.id !== chatId),
-      activeChatId: s.activeChatId === chatId ? null : s.activeChatId,
-      messages: s.activeChatId === chatId ? [] : s.messages,
-    })),
+    set((s) => {
+      const newUnread = { ...s.unreadCounts }
+      delete newUnread[chatId]
+      return {
+        chats: s.chats.filter((c) => c.id !== chatId),
+        activeChatId: s.activeChatId === chatId ? null : s.activeChatId,
+        messages: s.activeChatId === chatId ? [] : s.messages,
+        unreadCounts: newUnread,
+      }
+    }),
   // Fix Bug 1: Only reset messages if switching to a DIFFERENT chat
   setActiveChat: (id) =>
+    set((s) => {
+      const newUnread = { ...s.unreadCounts }
+      if (id) delete newUnread[id]
+      return {
+        activeChatId: id,
+        messages: id === s.activeChatId ? s.messages : [],
+        unreadCounts: newUnread,
+      }
+    }),
+  incrementUnread: (chatId, count) => 
     set((s) => ({
-      activeChatId: id,
-      messages: id === s.activeChatId ? s.messages : [],
+      unreadCounts: {
+        ...s.unreadCounts,
+        [chatId]: (s.unreadCounts[chatId] || 0) + count
+      }
     })),
+  clearUnread: (chatId) =>
+    set((s) => {
+      const newUnread = { ...s.unreadCounts }
+      delete newUnread[chatId]
+      return { unreadCounts: newUnread }
+    }),
 
   // ─── Messages ──────────────────────────────────────────────────────────
   messages: [],
@@ -137,6 +164,7 @@ export const useAppStore = create<AppState>()(
       partialize: (state) => ({
         activeProjectId: state.activeProjectId,
         activeChatId: state.activeChatId,
+        unreadCounts: state.unreadCounts,
       }),
     }
   )
