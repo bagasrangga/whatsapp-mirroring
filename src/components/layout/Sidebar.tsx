@@ -4,7 +4,7 @@ import { fetchChatsByProject, deleteChat } from '@/lib/db'
 import { formatChatTime, getStatusDotColor } from '@/lib/utils'
 import { Search, ChevronLeft, Upload, X, Trash2, AlertTriangle } from 'lucide-react'
 import ImportModal from '@/components/import/ImportModal'
-import type { Chat } from '@/types'
+import type { Chat, VendorStatus } from '@/types'
 
 export default function Sidebar() {
   const {
@@ -23,6 +23,7 @@ export default function Sidebar() {
   const [showImport, setShowImport] = useState(false)
   const [deletingChatId, setDeletingChatId] = useState<string | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [statusFilter, setStatusFilter] = useState<VendorStatus | 'All'>('All')
 
   const activeProject = projects.find((p) => p.id === activeProjectId)
 
@@ -34,14 +35,23 @@ export default function Sidebar() {
   }, [activeProjectId, setChats])
 
   const filtered = useMemo(() => {
-    if (!sidebarSearch.trim()) return chats
-    const q = sidebarSearch.toLowerCase()
-    return chats.filter(
-      (c) =>
-        c.contact_name.toLowerCase().includes(q) ||
-        c.last_message_snippet.toLowerCase().includes(q)
-    )
-  }, [chats, sidebarSearch])
+    let result = chats
+    
+    if (statusFilter !== 'All') {
+      result = result.filter(c => c.status === statusFilter)
+    }
+
+    if (sidebarSearch.trim()) {
+      const q = sidebarSearch.toLowerCase()
+      result = result.filter(
+        (c) =>
+          c.contact_name.toLowerCase().includes(q) ||
+          c.last_message_snippet.toLowerCase().includes(q)
+      )
+    }
+    
+    return result
+  }, [chats, sidebarSearch, statusFilter])
 
   const confirmDelete = useCallback(async () => {
     if (!deletingChatId) return
@@ -104,6 +114,25 @@ export default function Sidebar() {
                 <X size={14} />
               </button>
             )}
+          </div>
+        </div>
+
+        {/* Status Filters */}
+        <div className="px-3 pb-2 bg-wa-sidebar border-b border-gray-200">
+          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+            {['All', 'None', 'Opsi 1', 'Opsi 2', 'Ga Jadi', 'Mahal Brow'].map((status) => (
+              <button
+                key={status}
+                onClick={() => setStatusFilter(status as VendorStatus | 'All')}
+                className={`whitespace-nowrap px-3 py-1.5 text-xs font-medium rounded-full border transition-colors cursor-pointer flex-shrink-0 ${
+                  statusFilter === status
+                    ? 'bg-wa-green text-white border-wa-green'
+                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                }`}
+              >
+                {status === 'All' ? 'Semua' : status === 'None' ? 'Tanpa Status' : status}
+              </button>
+            ))}
           </div>
         </div>
 
