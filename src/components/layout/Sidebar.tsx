@@ -59,7 +59,7 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="w-[360px] flex-shrink-0 flex flex-col h-full bg-white border-r border-gray-200 shadow-sidebar">
+      <aside className="w-full md:w-[360px] lg:w-[400px] flex-shrink-0 flex flex-col h-full bg-white border-r border-gray-200 shadow-sidebar">
         {/* Header */}
         <div className="bg-wa-sidebar px-4 py-3 flex items-center gap-3">
           <button

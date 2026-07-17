@@ -27,7 +27,7 @@ interface ImportParams {
  * 4. Handles Smart Sync (delta sync for existing vendors)
  */
 export function useImportPipeline() {
-  const { addChat, updateChat, setImportProgress, resetImport } = useAppStore()
+  const { addChat, updateChat, setImportProgress } = useAppStore()
 
   const runImport = useCallback(
     async ({ file, projectId, contactName, vendorPhoneNumber }: ImportParams) => {
@@ -45,7 +45,7 @@ export function useImportPipeline() {
         }
 
         // Check for existing vendor (Smart Sync)
-        let existingChat = await findChatByName(projectId, contactName)
+        const existingChat = await findChatByName(projectId, contactName)
         let chatId: string
         let lastRealTimestamp: Date | null = null
 
@@ -144,7 +144,7 @@ export function useImportPipeline() {
         console.error('[Import Pipeline]', err)
       }
     },
-    [addChat, updateChat, setImportProgress, resetImport]
+    [addChat, updateChat, setImportProgress]
   )
 
   return { runImport }

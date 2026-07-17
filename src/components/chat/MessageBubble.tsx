@@ -7,9 +7,10 @@ interface Props {
   message: Message
   isOwner: boolean
   onDelete?: (messageId: string) => void
+  onImageClick?: (url: string) => void
 }
 
-const MessageBubble = memo(function MessageBubble({ message, isOwner, onDelete }: Props) {
+const MessageBubble = memo(function MessageBubble({ message, isOwner, onDelete, onImageClick }: Props) {
   const [showDelete, setShowDelete] = useState(false)
 
   const handleDelete = useCallback(() => {
@@ -70,6 +71,7 @@ const MessageBubble = memo(function MessageBubble({ message, isOwner, onDelete }
           <AttachmentContent
             url={message.attachment_url}
             fileName={message.attachment_url?.split('/').pop() ?? ''}
+            onImageClick={onImageClick}
           />
         )}
 
@@ -100,9 +102,74 @@ const MessageBubble = memo(function MessageBubble({ message, isOwner, onDelete }
 
 export default MessageBubble
 
+// ─── Grouped Messages ─────────────────────────────────────────────────────────
+
+interface GroupProps {
+  messages: Message[]
+  isOwner: boolean
+  onImageClick?: (url: string) => void
+}
+
+export const MessageGroupBubble = memo(function MessageGroupBubble({ messages, isOwner, onImageClick }: GroupProps) {
+  if (messages.length === 0) return null
+  const firstMsg = messages[0]
+
+  return (
+    <div className={`flex mb-1 ${isOwner ? 'justify-end' : 'justify-start'}`}>
+      <div className={`relative max-w-[68%] min-w-[60px] p-1.5 ${isOwner ? 'bubble-out' : 'bubble-in'}`}>
+        {!isOwner && (
+          <p className="text-xs font-semibold text-wa-green-dark mb-1 px-1.5 pt-0.5 leading-tight">
+            {firstMsg.sender_name}
+          </p>
+        )}
+        
+        <div className={`grid gap-1 ${messages.length === 2 ? 'grid-cols-2' : messages.length >= 3 ? 'grid-cols-3' : 'grid-cols-1'}`}>
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className="relative aspect-square overflow-hidden rounded-md cursor-pointer group"
+              onClick={() => msg.attachment_url && onImageClick?.(msg.attachment_url)}
+            >
+              {msg.attachment_url ? (
+                <img
+                  src={msg.attachment_url}
+                  alt="Attachment"
+                  loading="lazy"
+                  crossOrigin="anonymous"
+                  className="w-full h-full object-cover group-hover:opacity-90 transition-opacity"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none'
+                    e.currentTarget.nextElementSibling?.classList.remove('hidden')
+                  }}
+                />
+              ) : null}
+              <div className="hidden absolute inset-0 flex items-center justify-center bg-gray-100">
+                <ImageOff size={16} className="text-gray-400" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Timestamp of the last message */}
+        <div className="flex items-center gap-1 mt-1 justify-end px-1">
+          <span className="text-[10px] text-wa-timestamp">
+            {formatBubbleTime(messages[messages.length - 1].timestamp)}
+          </span>
+          {isOwner && (
+            <svg width="14" height="10" viewBox="0 0 14 10" fill="none" className="text-wa-read">
+              <path d="M1 5L4.5 8.5L13 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M5 5L8.5 8.5L13 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.6"/>
+            </svg>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+})
+
 // ─── Attachment Content ────────────────────────────────────────────────────────
 
-function AttachmentContent({ url, fileName }: { url: string | null; fileName: string }) {
+function AttachmentContent({ url, fileName, onImageClick }: { url: string | null; fileName: string; onImageClick?: (url: string) => void }) {
   if (!url) {
     return (
       <div className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2.5 mb-1.5 border border-gray-200">
@@ -127,7 +194,7 @@ function AttachmentContent({ url, fileName }: { url: string | null; fileName: st
           loading="lazy"
           crossOrigin="anonymous"
           className="max-w-full max-h-64 object-cover rounded-lg cursor-pointer hover:opacity-95 transition-opacity"
-          onClick={() => window.open(url, '_blank')}
+          onClick={() => onImageClick ? onImageClick(url) : window.open(url, '_blank')}
           onError={(e) => {
             // Fallback to placeholder if image fails to load
             const target = e.currentTarget

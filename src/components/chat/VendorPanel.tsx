@@ -33,7 +33,7 @@ export default function VendorPanel({ chat, onClose }: Props) {
   }, [chat.id, notes, updateChatNotes])
 
   return (
-    <aside className="w-[320px] flex-shrink-0 h-full bg-wa-sidebar border-l border-gray-200 flex flex-col overflow-y-auto slide-in-left">
+    <aside className="absolute md:relative inset-y-0 right-0 z-40 w-full md:w-[320px] flex-shrink-0 h-full bg-wa-sidebar border-l border-gray-200 flex flex-col overflow-y-auto slide-in-left shadow-2xl md:shadow-none">
       {/* Header */}
       <div className="bg-wa-teal px-4 py-3 flex items-center gap-3">
         <h2 className="flex-1 text-white font-semibold text-base">Info Vendor</h2>

@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import type { Project, Chat, Message, VendorStatus, ImportProgress } from '@/types'
 import { updateChatMeta } from '@/lib/db'
 
@@ -48,7 +49,9 @@ const DEFAULT_IMPORT_PROGRESS: ImportProgress = {
   mediaTotal: 0,
 }
 
-export const useAppStore = create<AppState>((set, get) => ({
+export const useAppStore = create<AppState>()(
+  persist(
+    (set, get) => ({
   // ─── Project ────────────────────────────────────────────────────────────
   projects: [],
   activeProjectId: null,
@@ -125,4 +128,13 @@ export const useAppStore = create<AppState>((set, get) => ({
       return { chats: updated }
     })
   },
-}))
+    }),
+    {
+      name: 'whatsapp-mirror-store',
+      partialize: (state) => ({
+        activeProjectId: state.activeProjectId,
+        activeChatId: state.activeChatId,
+      }),
+    }
+  )
+)

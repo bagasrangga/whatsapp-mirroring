@@ -35,8 +35,13 @@ export default function App() {
   // Active project → show full layout
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-wa-sidebar">
-      <Sidebar />
-      <main className="flex-1 flex flex-col min-w-0 h-full">
+      {/* Sidebar - hidden on mobile if a chat is active */}
+      <div className={`h-full ${activeChatId ? 'hidden md:block' : 'w-full md:w-auto'}`}>
+        <Sidebar />
+      </div>
+      
+      {/* Main chat area - hidden on mobile if no chat is active */}
+      <main className={`flex-1 flex flex-col min-w-0 h-full ${!activeChatId ? 'hidden md:flex' : 'flex'}`}>
         {activeChatId ? (
           <ChatView />
         ) : (
