@@ -191,11 +191,15 @@ export default function ChatView() {
                     <ChevronLeft size={24} className="text-gray-600" />
                   </button>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-wa-green-dark to-wa-green flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-semibold">
-                    {activeChat.contact_name[0]?.toUpperCase()}
-                  </span>
-                </div>
+                {(activeChat.status === 'Opsi 1' || activeChat.status === 'Opsi 2') ? (
+                  <img src="/avatar-opsi.jpg" alt={activeChat.contact_name} className="w-10 h-10 rounded-full object-cover flex-shrink-0 shadow-sm" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-wa-green-dark to-wa-green flex items-center justify-center flex-shrink-0 overflow-hidden shadow-sm">
+                    <span className="text-white font-semibold">
+                      {activeChat.contact_name[0]?.toUpperCase()}
+                    </span>
+                  </div>
+                )}
                 <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setShowPanel(!showPanel)}>
                   <p className="font-semibold text-sm text-foreground truncate">{activeChat.contact_name}</p>
                   <p className="text-xs text-gray-500 truncate">
