@@ -22,7 +22,7 @@ const LINE_REGEX =
 
 // Attachment indicator patterns in WhatsApp Mac Desktop export
 // Handles various formats and optional left-to-right mark (U+200E)
-const ATTACHMENT_REGEX = /^[\u200e\u202a\u202c]*<attached:\s*(.+)>\s*$/i
+const ATTACHMENT_REGEX = /<attached:\s*(.+?)>/i
 const ATTACHMENT_OMITTED_REGEX = /^[\u200e\u202a\u202c]*(.+?)\s+\(file attached\)\s*$/i
 const MEDIA_OMITTED_REGEX = /^[\u200e\u202a\u202c]*<Media omitted>\s*$/i
 // WhatsApp sometimes uses: "filename.jpg (file attached)" without angle brackets
@@ -97,9 +97,15 @@ function parseMessageContent(content: string): {
   // Check for attachment patterns
   const attachedMatch = rawText.match(ATTACHMENT_REGEX)
   if (attachedMatch) {
+    let remainingText = rawText.replace(attachedMatch[0], '').trim()
+    
+    // Optionally clean up WhatsApp's auto-generated file info like "filename.pdf • 4 pages"
+    // by checking if remainingText looks like file metadata. But keeping it is also fine.
+    // For now we keep it so any captions are preserved.
+
     return {
       senderName,
-      text: '',
+      text: remainingText,
       hasAttachment: true,
       attachmentFileName: attachedMatch[1].trim(),
     }
