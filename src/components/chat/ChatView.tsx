@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useAppStore } from '@/store/useAppStore'
 import { fetchMessages, insertDummyReply, updateChatMeta, deleteMessage } from '@/lib/db'
+import { broadcastAction } from '@/lib/broadcast'
 import { formatDateHeader } from '@/lib/utils'
 import MessageBubble, { MessageGroupBubble } from './MessageBubble'
 import VendorPanel from './VendorPanel'
@@ -45,10 +46,13 @@ export default function ChatView() {
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
-    if (!isSearching) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (!isSearching && !messagesLoading) {
+      const timer = setTimeout(() => {
+        bottomRef.current?.scrollIntoView({ behavior: 'auto' })
+      }, 100)
+      return () => clearTimeout(timer)
     }
-  }, [messages, isSearching])
+  }, [messages, isSearching, messagesLoading])
 
   // Group messages by date for section headers
   const groupedMessages = useMemo(() => {
@@ -83,9 +87,13 @@ export default function ChatView() {
       // Update sidebar
       await updateChatMeta(activeChatId, {
         lastMessageAt: msg.timestamp,
-        lastMessageSnippet: text.slice(0, 80),
+        lastMessageSnippet: `[DUMMY]${text.slice(0, 80)}`,
       })
-      updateChatLastMessage(activeChatId, text.slice(0, 80), msg.timestamp)
+      updateChatLastMessage(activeChatId, `[DUMMY]${text.slice(0, 80)}`, msg.timestamp)
+      
+      const store = useAppStore.getState()
+      broadcastAction(store.activeProjectId, { type: 'MESSAGES_CHANGED', chatId: activeChatId })
+      broadcastAction(store.activeProjectId, { type: 'CHAT_UPDATED', chatId: activeChatId, updates: { last_message_snippet: `[DUMMY]${text.slice(0, 80)}`, last_message_at: msg.timestamp } })
     } catch (e) {
       console.error(e)
     } finally {
@@ -96,11 +104,38 @@ export default function ChatView() {
   const handleDeleteMessage = useCallback(async (messageId: string) => {
     try {
       await deleteMessage(messageId)
-      useAppStore.getState().removeMessage(messageId)
+      const store = useAppStore.getState()
+      store.removeMessage(messageId)
+      
+      if (activeChatId) {
+        const currentMessages = useAppStore.getState().messages
+        const lastMsg = currentMessages[currentMessages.length - 1]
+        
+        if (lastMsg) {
+          const newSnippet = lastMsg.is_dummy_reply 
+            ? `[DUMMY]${(lastMsg.text || '').slice(0, 80)}`
+            : (lastMsg.text || (lastMsg.has_attachment ? '📷 Media' : '')).slice(0, 80)
+            
+          await updateChatMeta(activeChatId, {
+            lastMessageAt: lastMsg.timestamp,
+            lastMessageSnippet: newSnippet,
+          })
+          store.updateChatLastMessage(activeChatId, newSnippet, lastMsg.timestamp)
+          broadcastAction(store.activeProjectId, { type: 'MESSAGES_CHANGED', chatId: activeChatId })
+          broadcastAction(store.activeProjectId, { type: 'CHAT_UPDATED', chatId: activeChatId, updates: { last_message_snippet: newSnippet, last_message_at: lastMsg.timestamp } })
+        } else {
+          await updateChatMeta(activeChatId, {
+            lastMessageSnippet: '',
+          })
+          store.updateChatLastMessage(activeChatId, '', new Date().toISOString())
+          broadcastAction(store.activeProjectId, { type: 'MESSAGES_CHANGED', chatId: activeChatId })
+          broadcastAction(store.activeProjectId, { type: 'CHAT_UPDATED', chatId: activeChatId, updates: { last_message_snippet: '', last_message_at: new Date().toISOString() } })
+        }
+      }
     } catch (e) {
       console.error(e)
     }
-  }, [])
+  }, [activeChatId])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -290,11 +325,11 @@ export default function ChatView() {
       {/* Lightbox / Modal for Images */}
       {selectedImage && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-sm animate-in fade-in p-4 pt-16 md:p-8"
           onClick={() => setSelectedImage(null)}
         >
           <button
-            className="absolute top-4 right-4 p-2 text-white/70 hover:text-white bg-black/40 hover:bg-black/60 rounded-full transition-all cursor-pointer"
+            className="absolute top-4 right-4 md:top-6 md:right-6 z-[60] p-2 text-white bg-black/50 hover:bg-black/80 rounded-full transition-all cursor-pointer"
             onClick={(e) => {
               e.stopPropagation()
               setSelectedImage(null)
@@ -306,7 +341,7 @@ export default function ChatView() {
           
           {selectedImage.toLowerCase().match(/\.pdf(\?.*)?$/) ? (
             <div
-              className="w-[90vw] h-[90vh] bg-white rounded-lg shadow-xl overflow-hidden relative"
+              className="w-full h-full max-w-5xl bg-white rounded-lg shadow-xl overflow-hidden relative"
               onClick={(e) => e.stopPropagation()}
             >
               <iframe
@@ -319,7 +354,7 @@ export default function ChatView() {
             <img
               src={selectedImage}
               alt="Expanded view"
-              className="max-w-[90vw] max-h-[90vh] object-contain rounded-sm"
+              className="max-w-full max-h-full object-contain rounded-sm"
               onClick={(e) => e.stopPropagation()} // Prevent clicking image from closing
               crossOrigin="anonymous"
             />

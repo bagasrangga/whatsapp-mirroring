@@ -69,6 +69,22 @@ export async function findChatByName(projectId: string, contactName: string): Pr
   return data ?? null
 }
 
+export async function findChatBySenderName(projectId: string, senderName: string): Promise<Chat | null> {
+  const { data, error } = await supabase
+    .from('chats')
+    .select('*, messages!inner(sender_name)')
+    .eq('project_id', projectId)
+    .eq('messages.sender_name', senderName)
+    .limit(1)
+    .maybeSingle()
+
+  if (error || !data) return null
+  
+  // Clean up the joined messages array before returning as Chat
+  const { messages, ...chat } = data as any
+  return chat as Chat
+}
+
 export async function updateChatMeta(chatId: string, params: {
   lastMessageAt?: string
   lastMessageSnippet?: string

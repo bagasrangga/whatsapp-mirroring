@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useAppStore } from '@/store/useAppStore'
 import { fetchProjects } from '@/lib/db'
+import { useRealtime } from '@/hooks/useRealtime'
 import Sidebar from '@/components/layout/Sidebar'
 import ChatView from '@/components/chat/ChatView'
 import Dashboard from '@/components/project/Dashboard'
 
 export default function App() {
+  useRealtime()
+  
   const { activeProjectId, activeChatId, setProjects } = useAppStore()
   const [loading, setLoading] = useState(true)
 

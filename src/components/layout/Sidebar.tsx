@@ -237,8 +237,15 @@ function ChatItem({ chat, isActive, onSelect, onDelete }: ChatItemProps) {
           </div>
           <div className="flex items-center gap-2 mt-0.5">
             <p className="text-xs text-gray-500 truncate flex-1">
-              {chat.last_message_snippet || 'Belum ada pesan'}
+              {chat.last_message_snippet.startsWith('[DUMMY]') 
+                ? chat.last_message_snippet.slice(7) 
+                : (chat.last_message_snippet || 'Belum ada pesan')}
             </p>
+            {chat.last_message_snippet.startsWith('[DUMMY]') && (
+              <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-[9px] font-bold rounded-full border border-red-200 flex-shrink-0">
+                Balesin brow
+              </span>
+            )}
             {chat.status !== 'None' && (
               <span className={`w-2 h-2 rounded-full flex-shrink-0 ${getStatusDotColor(chat.status)}`} />
             )}

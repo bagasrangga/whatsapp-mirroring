@@ -63,7 +63,12 @@ const MessageBubble = memo(function MessageBubble({ message, isOwner, onDelete, 
 
         {/* Dummy reply label */}
         {message.is_dummy_reply && (
-          <p className="text-[10px] font-semibold text-blue-500 mb-0.5">💬 Catatan / Simulasi</p>
+          <div className="flex items-center gap-2 mb-0.5">
+            <p className="text-[10px] font-semibold text-blue-500">💬 Catatan / Simulasi</p>
+            <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[9px] font-bold rounded-full uppercase tracking-wider">
+              Balesin brow
+            </span>
+          </div>
         )}
 
         {/* Attachment */}

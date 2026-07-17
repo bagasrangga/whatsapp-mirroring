@@ -4,11 +4,13 @@ import { getMimeType, generateId } from '@/lib/utils'
 import {
   createChat,
   findChatByName,
+  findChatBySenderName,
   getLastRealMessageTimestamp,
   bulkInsertMessages,
   uploadMedia,
   updateChatMeta,
 } from '@/lib/db'
+import { broadcastAction } from '@/lib/broadcast'
 import { useAppStore } from '@/store/useAppStore'
 import type { ImportProgress } from '@/types'
 
@@ -17,6 +19,7 @@ interface ImportParams {
   projectId: string
   contactName: string
   vendorPhoneNumber: string
+  onConfirmSync?: (chatName: string) => Promise<boolean>
 }
 
 /**
@@ -30,7 +33,7 @@ export function useImportPipeline() {
   const { addChat, updateChat, setImportProgress } = useAppStore()
 
   const runImport = useCallback(
-    async ({ file, projectId, contactName, vendorPhoneNumber }: ImportParams) => {
+    async ({ file, projectId, contactName, vendorPhoneNumber, onConfirmSync }: ImportParams) => {
       const progress = (p: Partial<ImportProgress>) =>
         setImportProgress({ ...useAppStore.getState().importProgress, ...p })
 
@@ -45,7 +48,33 @@ export function useImportPipeline() {
         }
 
         // Check for existing vendor (Smart Sync)
-        const existingChat = await findChatByName(projectId, contactName)
+        let existingChat = await findChatByName(projectId, contactName)
+
+        if (!existingChat) {
+          // Fallback: Try to match by sender names inside the chat
+          const OWNER_NAME = 'Bagas R'
+          const counterparties = Array.from(new Set(parsed.messages
+            .filter(m => !m.is_system_message && m.sender_name !== OWNER_NAME && m.sender_name !== 'system')
+            .map(m => m.sender_name)
+          ))
+          
+          for (const cp of counterparties) {
+            const matched = await findChatBySenderName(projectId, cp)
+            if (matched) {
+              existingChat = matched
+              break
+            }
+          }
+        }
+
+        if (existingChat && onConfirmSync) {
+          const confirmed = await onConfirmSync(existingChat.contact_name)
+          if (!confirmed) {
+            progress({ stage: 'idle', mediaUploaded: 0, mediaTotal: 0 })
+            return
+          }
+        }
+
         let chatId: string
         let lastRealTimestamp: Date | null = null
 
@@ -138,6 +167,7 @@ export function useImportPipeline() {
         }
 
         progress({ stage: 'done' })
+        broadcastAction(projectId, { type: 'CHAT_IMPORTED', chatId })
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Terjadi kesalahan saat mengimpor.'
         progress({ stage: 'error', error: msg })

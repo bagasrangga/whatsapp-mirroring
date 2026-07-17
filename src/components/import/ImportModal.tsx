@@ -18,6 +18,26 @@ export default function ImportModal({ projectId, onClose }: Props) {
   const [phone, setPhone] = useState('')
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  
+  const [confirmSyncChatName, setConfirmSyncChatName] = useState<string | null>(null)
+  const resolveConfirmRef = useRef<(value: boolean) => void>(undefined)
+
+  const handleConfirm = useCallback((chatName: string) => {
+    setConfirmSyncChatName(chatName)
+    return new Promise<boolean>((resolve) => {
+      resolveConfirmRef.current = resolve
+    })
+  }, [])
+
+  const acceptConfirm = useCallback(() => {
+    setConfirmSyncChatName(null)
+    resolveConfirmRef.current?.(true)
+  }, [])
+
+  const rejectConfirm = useCallback(() => {
+    setConfirmSyncChatName(null)
+    resolveConfirmRef.current?.(false)
+  }, [])
 
   const isProcessing = ['extracting', 'uploading_media', 'saving_messages'].includes(importProgress.stage)
   const isDone = importProgress.stage === 'done'
@@ -50,8 +70,9 @@ export default function ImportModal({ projectId, onClose }: Props) {
       projectId,
       contactName: contactName.trim(),
       vendorPhoneNumber: phone.trim(),
+      onConfirmSync: handleConfirm,
     })
-  }, [file, contactName, phone, projectId, runImport])
+  }, [file, contactName, phone, projectId, runImport, handleConfirm])
 
   const stageLabel: Record<string, string> = {
     extracting: 'Mengekstrak file ZIP...',
@@ -157,7 +178,7 @@ export default function ImportModal({ projectId, onClose }: Props) {
           )}
 
           {/* Progress UI */}
-          {isProcessing && (
+          {isProcessing && !confirmSyncChatName && (
             <div className="space-y-3 animate-in">
               <div className="flex items-center gap-3">
                 <Loader2 size={18} className="text-wa-green animate-spin flex-shrink-0" />
@@ -192,6 +213,24 @@ export default function ImportModal({ projectId, onClose }: Props) {
             </div>
           )}
 
+          {/* Confirm Sync UI */}
+          {confirmSyncChatName && (
+            <div className="flex flex-col items-center gap-3 py-6 animate-in">
+              <div className="w-12 h-12 rounded-full bg-yellow-50 flex items-center justify-center mb-1">
+                <AlertCircle size={24} className="text-yellow-500" />
+              </div>
+              <div className="text-center space-y-1">
+                <h3 className="font-semibold text-foreground text-base">Sinkronisasi Chat</h3>
+                <p className="text-sm text-gray-500">
+                  Data ini akan ditambahkan ke ruang chat yang sudah ada:
+                </p>
+                <div className="inline-block mt-3 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg">
+                  <span className="font-medium text-gray-800">{confirmSyncChatName}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Done */}
           {isDone && (
             <div className="flex flex-col items-center gap-2 py-4 animate-in">
@@ -212,7 +251,22 @@ export default function ImportModal({ projectId, onClose }: Props) {
 
         {/* Footer */}
         <div className="px-5 py-4 border-t border-gray-100 flex justify-end gap-2">
-          {isDone ? (
+          {confirmSyncChatName ? (
+            <>
+              <button
+                onClick={rejectConfirm}
+                className="px-4 py-2 text-sm text-gray-500 hover:text-foreground transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                onClick={acceptConfirm}
+                className="px-5 py-2.5 bg-wa-green text-white text-sm font-medium rounded-xl hover:bg-wa-green-dark transition-colors cursor-pointer"
+              >
+                Ya, Timpa
+              </button>
+            </>
+          ) : isDone ? (
             <button
               onClick={onClose}
               className="px-5 py-2.5 bg-wa-green text-white text-sm font-medium rounded-xl hover:bg-wa-green-dark transition-colors cursor-pointer"

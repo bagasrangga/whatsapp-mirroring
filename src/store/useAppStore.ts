@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Project, Chat, Message, VendorStatus, ImportProgress } from '@/types'
 import { updateChatMeta } from '@/lib/db'
+import { broadcastAction } from '@/lib/broadcast'
 
 interface AppState {
   // ─── Project ──────────────────────────────────────────────────────────
@@ -109,11 +110,13 @@ export const useAppStore = create<AppState>()(
   updateChatStatus: async (chatId, status) => {
     get().updateChat(chatId, { status })
     await updateChatMeta(chatId, { status })
+    broadcastAction(get().activeProjectId, { type: 'CHAT_UPDATED', chatId, updates: { status } })
   },
 
   updateChatNotes: async (chatId, notes) => {
     get().updateChat(chatId, { internal_notes: notes })
     await updateChatMeta(chatId, { internalNotes: notes })
+    broadcastAction(get().activeProjectId, { type: 'CHAT_UPDATED', chatId, updates: { internal_notes: notes } })
   },
 
   updateChatLastMessage: (chatId, snippet, at) => {
