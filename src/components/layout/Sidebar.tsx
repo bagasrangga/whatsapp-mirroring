@@ -123,7 +123,7 @@ export default function Sidebar() {
         {/* Status Filters */}
         <div className="px-3 pb-2 bg-wa-sidebar border-b border-gray-200">
           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-            {['All', 'None', 'Opsi 1', 'Opsi 2', 'Ga Jadi', 'Mahal Brow'].map((status) => (
+            {['All', 'None', 'Opsi 1', 'Opsi 2', 'Ga Jadi', 'Mahal Brow', 'Full Booked'].map((status) => (
               <button
                 key={status}
                 onClick={() => setStatusFilter(status as VendorStatus | 'All')}
@@ -239,6 +239,7 @@ function ChatItem({ chat, isActive, unreadCount = 0, onSelect, onDelete }: ChatI
     'Opsi 2': 'bg-purple-50 text-purple-600 border-purple-100',
     'Ga Jadi': 'bg-red-50 text-red-600 border-red-100',
     'Mahal Brow': 'bg-amber-50 text-amber-600 border-amber-100',
+    'Full Booked': 'bg-gray-100 text-gray-700 border-gray-300',
   }
 
   return (

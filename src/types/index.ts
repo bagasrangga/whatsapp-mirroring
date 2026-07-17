@@ -1,6 +1,6 @@
 // ─── Database Types ────────────────────────────────────────────────────────────
 
-export type VendorStatus = 'None' | 'Opsi 1' | 'Opsi 2' | 'Ga Jadi' | 'Mahal Brow'
+export type VendorStatus = 'None' | 'Opsi 1' | 'Opsi 2' | 'Ga Jadi' | 'Mahal Brow' | 'Full Booked'
 
 export interface Project {
   id: string

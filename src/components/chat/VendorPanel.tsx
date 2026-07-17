@@ -4,7 +4,7 @@ import { X, Phone, StickyNote, Tag } from 'lucide-react'
 import type { Chat, VendorStatus } from '@/types'
 import { getStatusColor } from '@/lib/utils'
 
-const STATUSES: VendorStatus[] = ['None', 'Opsi 1', 'Opsi 2', 'Ga Jadi', 'Mahal Brow']
+const STATUSES: VendorStatus[] = ['None', 'Opsi 1', 'Opsi 2', 'Ga Jadi', 'Mahal Brow', 'Full Booked']
 
 interface Props {
   chat: Chat

@@ -121,6 +121,7 @@ export function getStatusColor(status: string): string {
     case 'Opsi 2': return 'bg-purple-100 text-purple-700 border-purple-200'
     case 'Ga Jadi': return 'bg-red-100 text-red-700 border-red-200'
     case 'Mahal Brow': return 'bg-amber-100 text-amber-700 border-amber-200'
+    case 'Full Booked': return 'bg-gray-100 text-gray-700 border-gray-300'
     default: return 'bg-slate-100 text-slate-500 border-slate-200'
   }
 }
@@ -132,6 +133,7 @@ export function getStatusDotColor(status: string): string {
     case 'Opsi 2': return 'bg-purple-500'
     case 'Ga Jadi': return 'bg-red-500'
     case 'Mahal Brow': return 'bg-amber-500'
+    case 'Full Booked': return 'bg-gray-500'
     default: return 'bg-slate-400'
   }
 }

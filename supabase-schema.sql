@@ -19,7 +19,7 @@ create table if not exists chats (
   project_id            uuid not null references projects(id) on delete cascade,
   contact_name          text not null,
   vendor_phone_number   text default '',
-  status                text default 'None' check (status in ('None','Opsi 1','Opsi 2','Ga Jadi','Mahal Brow')),
+  status                text default 'None' check (status in ('None','Opsi 1','Opsi 2','Ga Jadi','Mahal Brow','Full Booked')),
   internal_notes        text default '',
   last_message_at       timestamptz default now(),
   last_message_snippet  text default '',
