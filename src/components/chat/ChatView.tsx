@@ -168,7 +168,7 @@ export default function ChatView() {
                      value={searchQuery}
                      onChange={(e) => setSearchQuery(e.target.value)}
                      placeholder="Cari pesan di chat ini..."
-                     className="w-full bg-white text-sm pl-9 pr-9 py-2 rounded-lg border border-transparent focus:border-gray-300 outline-none transition-colors placeholder:text-gray-400"
+                     className="w-full bg-white text-[16px] md:text-sm pl-9 pr-9 py-2 rounded-lg border border-transparent focus:border-gray-300 outline-none transition-colors placeholder:text-gray-400"
                    />
                    {searchQuery && (
                      <button
@@ -297,7 +297,7 @@ export default function ChatView() {
               onKeyDown={handleKeyDown}
               placeholder="Ketik catatan atau balasan simulasi..."
               rows={1}
-              className="flex-1 resize-none outline-none text-sm text-foreground placeholder:text-gray-400 max-h-32 overflow-y-auto leading-relaxed bg-transparent"
+              className="flex-1 resize-none outline-none text-[16px] md:text-sm text-foreground placeholder:text-gray-400 max-h-32 overflow-y-auto leading-relaxed bg-transparent"
               style={{ height: 'auto' }}
               onInput={(e) => {
                 const target = e.target as HTMLTextAreaElement

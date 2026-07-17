@@ -94,7 +94,7 @@ export default function Sidebar() {
               placeholder="Cari atau mulai obrolan baru"
               value={sidebarSearch}
               onChange={(e) => setSidebarSearch(e.target.value)}
-              className="w-full bg-white text-sm pl-9 pr-9 py-2 rounded-lg border border-transparent focus:border-gray-300 outline-none transition-colors placeholder:text-gray-400"
+              className="w-full bg-white text-[16px] md:text-sm pl-9 pr-9 py-2 rounded-lg border border-transparent focus:border-gray-300 outline-none transition-colors placeholder:text-gray-400"
             />
             {sidebarSearch && (
               <button
